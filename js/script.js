@@ -40,7 +40,7 @@ function ParDeBarreiras(altura, abertura, x) {
     this.setX(x);
 }
 
-function Barreiras(altura, largura, abertura, espaco) {
+function Barreiras(altura, largura, abertura, espaco, notificarPonto) {
     this.pares = [
         new ParDeBarreiras(altura, abertura, largura),
         new ParDeBarreiras(altura, abertura, largura + espaco),
@@ -58,11 +58,48 @@ function Barreiras(altura, largura, abertura, espaco) {
                 par.setX(par.getX() + espaco * this.pares.length);
                 par.sortearAbertura();
             }
+
+            const meio = largura / 2;
+            const cruzouMeio = par.getX() + deslocamento >= meio && par.getX() < meio;
+            cruzouMeio && notificarPonto();
         });
     };
 }
 
-const barreiras = new Barreiras(500, 1200, 160, 400);
+function Bird(alturaDoJogo) {
+    this.elemento = novoElemento('img', 'bird');
+    this.elemento.src = 'imgs/bird.png';
+
+    let voando = false;
+
+    this.getY = () => parseInt(this.elemento.style.bottom.split('px')[0]);
+    this.setY = y => this.elemento.style.bottom = `${y}px`;
+
+    window.onkeydown = _ => voando = true;
+    window.onkeyup = _ => voando = false;
+
+    this.animar = () => {
+        const novoY = this.getY() + (voando ? 8 : -5);
+        const alturaMaxima = alturaDoJogo - this.elemento.clientHeight;
+
+        if (novoY <= 0) {
+            this.setY(0);
+        } else if (novoY >= alturaMaxima) {
+            this.setY(alturaMaxima);
+        } else {
+            this.setY(novoY);
+        }
+    }
+
+    this.setY(alturaDoJogo / 2);
+}
+
+const barreiras = new Barreiras(500, 1200, 160, 400, () => {});
+const bird = new Bird(500);
 const areaDoJogo = document.querySelector('[flappy]');
+areaDoJogo.appendChild(bird.elemento);
 barreiras.pares.forEach(par => areaDoJogo.appendChild(par.elemento));
-setInterval(barreiras.animar, 20);
+setInterval(() => {
+    barreiras.animar();
+    bird.animar();
+}, 20);
