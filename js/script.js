@@ -94,12 +94,33 @@ function Bird(alturaDoJogo) {
     this.setY(alturaDoJogo / 2);
 }
 
-const barreiras = new Barreiras(500, 1200, 160, 400, () => {});
-const bird = new Bird(500);
-const areaDoJogo = document.querySelector('[flappy]');
-areaDoJogo.appendChild(bird.elemento);
-barreiras.pares.forEach(par => areaDoJogo.appendChild(par.elemento));
-setInterval(() => {
-    barreiras.animar();
-    bird.animar();
-}, 20);
+function Progress() {
+    this.elemento = novoElemento('span', 'progress');
+    this.atualizarPontos = pontos => this.elemento.innerHTML = pontos;
+    this.atualizarPontos(0);
+}
+
+function FlappyBird() {
+    let pontos = 0;
+
+    const areaDoJogo = document.querySelector('[flappy]');
+    const altura = areaDoJogo.clientHeight;
+    const largura = areaDoJogo.clientWidth;
+
+    const progresso = new Progress();
+    const barreiras = new Barreiras(altura, largura, 200, 400, () => progresso.atualizarPontos(++pontos));
+    const passaro = new Bird(altura);
+
+    areaDoJogo.appendChild(progresso.elemento);
+    areaDoJogo.appendChild(passaro.elemento);
+    barreiras.pares.forEach(par => areaDoJogo.appendChild(par.elemento));
+
+    this.start = () => {
+        const temporizador = setInterval(() => {
+            barreiras.animar();
+            passaro.animar();
+        }, 20);
+    }
+}
+
+new FlappyBird().start();
