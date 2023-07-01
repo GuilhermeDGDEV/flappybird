@@ -4,6 +4,30 @@ function novoElemento(tagName, className) {
     return elem;
 }
 
+function sobrepostos(elementoA, elementoB) {
+    const a = elementoA.getBoundingClientRect();
+    const b = elementoB.getBoundingClientRect();
+
+    const horizontal = a.left + a.width >= b.left && b.left + b.width >= a.left;
+    const vertical = a.top + a.height >= b.top && b.top + b.height >= a.top;
+
+    return horizontal && vertical;
+}
+
+function colidiu(passaro, barreiras) {
+    let colidiu = false;
+
+    barreiras.pares.forEach(par => {
+        if (!colidiu) {
+            const superior = par.superior.elemento;
+            const inferior = par.inferior.elemento;
+            colidiu = sobrepostos(passaro.elemento, superior) || sobrepostos(passaro.elemento, inferior);
+        }
+    });
+
+    return colidiu;
+}
+
 function Barreira(reversa = false) {
     this.elemento = novoElemento('div', 'barreira');
 
@@ -119,6 +143,8 @@ function FlappyBird() {
         const temporizador = setInterval(() => {
             barreiras.animar();
             passaro.animar();
+
+            colidiu(passaro, barreiras) && clearInterval(temporizador);
         }, 20);
     }
 }
