@@ -40,5 +40,29 @@ function ParDeBarreiras(altura, abertura, x) {
     this.setX(x);
 }
 
-const b = new ParDeBarreiras(500, 160, 400);
-document.querySelector('[flappy]').appendChild(b.elemento);
+function Barreiras(altura, largura, abertura, espaco) {
+    this.pares = [
+        new ParDeBarreiras(altura, abertura, largura),
+        new ParDeBarreiras(altura, abertura, largura + espaco),
+        new ParDeBarreiras(altura, abertura, largura + espaco * 2),
+        new ParDeBarreiras(altura, abertura, largura + espaco * 3),
+    ];
+
+    const deslocamento = 3;
+
+    this.animar = () => {
+        this.pares.forEach(par => {
+            par.setX(par.getX() - deslocamento);
+
+            if (par.getX() < -par.getLargura()) {
+                par.setX(par.getX() + espaco * this.pares.length);
+                par.sortearAbertura();
+            }
+        });
+    };
+}
+
+const barreiras = new Barreiras(500, 1200, 160, 400);
+const areaDoJogo = document.querySelector('[flappy]');
+barreiras.pares.forEach(par => areaDoJogo.appendChild(par.elemento));
+setInterval(barreiras.animar, 20);
